@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     POSTGRES_DB: str
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5433
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # Load configuration from the project's .env file
     model_config = SettingsConfigDict(
@@ -33,3 +36,5 @@ class Settings(BaseSettings):
 
 # Initialize application settings
 settings = Settings()
+
+

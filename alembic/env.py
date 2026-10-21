@@ -18,6 +18,7 @@ if config.config_file_name is not None:
 from office_loan_policy_assistant.core.config import settings
 from office_loan_policy_assistant.db.database import Base
 from office_loan_policy_assistant.models.employee import Employee
+from office_loan_policy_assistant.models.user import User
 
 # Register our SQLAlchemy models with Alembic
 target_metadata = Base.metadata
