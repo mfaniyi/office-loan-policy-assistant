@@ -1,6 +1,8 @@
 from fastapi import FastAPI
+
 from office_loan_policy_assistant.api.auth import router as auth_router
 from office_loan_policy_assistant.api.employees import router as employee_router
+from office_loan_policy_assistant.api.loans import router as loan_router
 
 
 app = FastAPI(
@@ -12,6 +14,7 @@ app = FastAPI(
 # Register application routers
 app.include_router(auth_router)
 app.include_router(employee_router)
+app.include_router(loan_router)
 
 
 @app.get("/")
