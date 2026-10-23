@@ -120,3 +120,25 @@ class LoanInterestResponse(BaseModel):
     total_repayment: Decimal
     monthly_repayment: Decimal
     calculation_note: str
+
+
+class PersonalLoanAssessmentRequest(BaseModel):
+    """Validate personalized loan assessment inputs."""
+    loan_type: LoanType
+    requested_amount: Decimal = Field(gt=0)
+    repayment_months: int = Field(ge=1, le=12)
+    annual_interest_rate: Decimal | None = Field(
+        default=None,
+        ge=0,
+        le=100,
+    )
+
+
+class PersonalLoanAssessmentResponse(LoanCalculationResponse):
+    """Include basic employee eligibility in personalized assessments."""
+
+    meets_basic_criteria: bool
+    eligibility_reasons: list[str]
+    eligibility_note: str
+    meets_repayment_history_rule: bool | None = None
+    repayment_history_reason: str
