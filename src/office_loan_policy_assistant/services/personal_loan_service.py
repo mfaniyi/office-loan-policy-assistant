@@ -1,21 +1,28 @@
+from datetime import date
+from sqlalchemy.orm import Session
 from office_loan_policy_assistant.models.employee import Employee
+from office_loan_policy_assistant.services.loan_service import calculate_loan
 from office_loan_policy_assistant.schemas.loan import (
     LoanCalculationRequest,
     LoanCalculationResponse,
     PersonalLoanAssessmentRequest,
     PersonalLoanAssessmentResponse,
 )
-from datetime import date
 from office_loan_policy_assistant.services.eligibility_service import (
     check_employee_eligibility,
     check_previous_loan_repayment,
+    check_active_loan,
 )
-from office_loan_policy_assistant.services.loan_service import calculate_loan
+from office_loan_policy_assistant.services.loan_record_service import (
+    get_active_loan,
+)
+
 
 
 def calculate_personal_loan(
     employee: Employee,
     request: PersonalLoanAssessmentRequest,
+    db: Session,
 ) -> PersonalLoanAssessmentResponse:
     """Calculate a personalized loan and assess basic eligibility."""
 
@@ -38,6 +45,14 @@ def calculate_personal_loan(
         last_repayment_date=employee.last_loan_repayment_date,
         assessment_date=date.today(),
     )
+
+    # Retrieve the employee's active company loan
+    active_loan = get_active_loan(
+        db=db,
+        employee_id=employee.id,
+    )
+
+    active_loan_check = check_active_loan(active_loan)
     
     # Explain unmet eligibility requirements
     message = calculation.message
@@ -61,6 +76,14 @@ def calculate_personal_loan(
             "has not been satisfied."
         )
 
+    # Explain restrictions when an active company loan exists
+    if active_loan_check["has_active_loan"]:
+        message += (
+            " An active company loan was found. "
+            "A new loan generally requires the existing loan to be settled. "
+            "Management-approved top-up exceptions may apply."
+        )
+
     return PersonalLoanAssessmentResponse(
         **calculation.model_dump(exclude={"assessment_type", "message"}),
         assessment_type="personalized",
@@ -71,5 +94,7 @@ def calculate_personal_loan(
         meets_repayment_history_rule=repayment_history[
             "meets_repayment_history_rule"
         ],
-        repayment_history_reason=repayment_history["reason"],        
+        repayment_history_reason=repayment_history["reason"],
+        has_active_loan=active_loan_check["has_active_loan"],
+        active_loan_reason=active_loan_check["reason"],        
     )

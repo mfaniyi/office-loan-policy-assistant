@@ -1,6 +1,6 @@
 from decimal import Decimal
 from types import SimpleNamespace
-
+from unittest.mock import Mock, patch
 from office_loan_policy_assistant.schemas.loan import (
     PersonalLoanAssessmentRequest,
 )
@@ -14,6 +14,7 @@ def test_personal_loan_uses_employee_salary():
 
     # Simulate a fictional employee's stored financial details
     employee = SimpleNamespace(
+        id=1,
         gross_monthly_salary=Decimal("250000"),
         net_monthly_salary=Decimal("210000"),
         is_full_time=True,
@@ -29,9 +30,20 @@ def test_personal_loan_uses_employee_salary():
         annual_interest_rate=Decimal("10"),
     )
 
-    result = calculate_personal_loan(employee, request)
+    # Simulate an employee with no active company loan
+    with patch(
+        "office_loan_policy_assistant.services.personal_loan_service.get_active_loan",
+        return_value=None,
+    ):
+        result = calculate_personal_loan(
+            employee=employee,
+            request=request,
+            db=Mock(),
+        )
 
     assert result.maximum_loan_amount == Decimal("500000.00")
     assert result.monthly_repayment_limit == Decimal("70000.00")
     assert result.assessment_type == "personalized"
     assert result.is_interest_affordable is True
+    assert result.has_active_loan is False
+    assert "No active loan was found" in result.active_loan_reason

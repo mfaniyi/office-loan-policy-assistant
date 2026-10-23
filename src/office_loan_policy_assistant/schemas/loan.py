@@ -142,3 +142,5 @@ class PersonalLoanAssessmentResponse(LoanCalculationResponse):
     eligibility_note: str
     meets_repayment_history_rule: bool | None = None
     repayment_history_reason: str
+    has_active_loan: bool | None = None
+    active_loan_reason: str

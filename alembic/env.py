@@ -19,6 +19,7 @@ from office_loan_policy_assistant.core.config import settings
 from office_loan_policy_assistant.db.database import Base
 from office_loan_policy_assistant.models.employee import Employee
 from office_loan_policy_assistant.models.user import User
+from office_loan_policy_assistant.models.loan import Loan
 
 # Register our SQLAlchemy models with Alembic
 target_metadata = Base.metadata

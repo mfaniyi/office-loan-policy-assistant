@@ -1,4 +1,5 @@
 from office_loan_policy_assistant.models.employee import Employee
+from office_loan_policy_assistant.models.loan import Loan
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 
@@ -58,4 +59,23 @@ def check_previous_loan_repayment(
     return {
         "meets_repayment_history_rule": True,
         "reason": "The six-month repayment waiting period has been satisfied.",
+    }
+
+
+def check_active_loan(active_loan: Loan | None) -> dict:
+    """Check whether an employee has an existing active loan."""
+
+    if active_loan is None:
+        return {
+            "has_active_loan": False,
+            "reason": "No active loan was found in the company loan records.",
+        }
+
+    return {
+        "has_active_loan": True,
+        "reason": (
+            "Employee has an existing active loan. "
+            "A new loan generally requires the existing loan to be settled. "
+            "Management-approved top-up exceptions may apply."
+        ),
     }

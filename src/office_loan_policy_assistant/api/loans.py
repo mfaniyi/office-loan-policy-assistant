@@ -79,4 +79,5 @@ def assess_my_loan(
     return calculate_personal_loan(
         employee=employee,
         request=request,
+        db=db,
     )
