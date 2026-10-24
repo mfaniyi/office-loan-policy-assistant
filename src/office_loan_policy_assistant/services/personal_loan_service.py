@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 from sqlalchemy.orm import Session
 from office_loan_policy_assistant.models.employee import Employee
 from office_loan_policy_assistant.services.loan_service import calculate_loan
@@ -12,6 +13,7 @@ from office_loan_policy_assistant.services.eligibility_service import (
     check_employee_eligibility,
     check_previous_loan_repayment,
     check_active_loan,
+    check_total_outstanding_limit,
 )
 from office_loan_policy_assistant.services.loan_record_service import (
     get_active_loan,
@@ -53,6 +55,19 @@ def calculate_personal_loan(
     )
 
     active_loan_check = check_active_loan(active_loan)
+
+    # Calculate the outstanding balance using available company loan records
+    existing_balance = (
+        active_loan.outstanding_balance
+        if active_loan is not None
+        else Decimal("0")
+    )
+
+    outstanding_check = check_total_outstanding_limit(
+        gross_monthly_salary=employee.gross_monthly_salary,
+        requested_amount=request.requested_amount,
+        existing_balance=existing_balance,
+    )
     
     # Explain unmet eligibility requirements
     message = calculation.message
@@ -84,6 +99,14 @@ def calculate_personal_loan(
             "Management-approved top-up exceptions may apply."
         )
 
+    # Explain when combined borrowing exceeds the policy limit
+    if not outstanding_check["is_within_total_outstanding_limit"]:
+        message += (
+            " The combined outstanding loan amount exceeds "
+            "'50%' of the employee's annual gross salary. "
+            "The requested amount does not satisfy this borrowing limit."
+        )
+
     return PersonalLoanAssessmentResponse(
         **calculation.model_dump(exclude={"assessment_type", "message"}),
         assessment_type="personalized",
@@ -96,5 +119,12 @@ def calculate_personal_loan(
         ],
         repayment_history_reason=repayment_history["reason"],
         has_active_loan=active_loan_check["has_active_loan"],
-        active_loan_reason=active_loan_check["reason"],        
+        active_loan_reason=active_loan_check["reason"],
+        existing_outstanding_balance=outstanding_check[
+            "existing_outstanding_balance"
+        ],
+        combined_loan_amount=outstanding_check["combined_loan_amount"],
+        is_within_total_outstanding_limit=outstanding_check[
+            "is_within_total_outstanding_limit"
+        ],        
     )

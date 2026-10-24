@@ -1,10 +1,12 @@
 from types import SimpleNamespace
 from datetime import date
+from decimal import Decimal
 from types import SimpleNamespace
 from office_loan_policy_assistant.services.eligibility_service import (
     check_employee_eligibility,
     check_active_loan,
     check_previous_loan_repayment,
+    check_total_outstanding_limit,
 )
 
 
@@ -48,3 +50,16 @@ def test_employee_with_active_loan():
 
     assert result["has_active_loan"] is True
     assert "existing active loan" in result["reason"]
+
+
+def test_total_outstanding_limit_exceeded():
+    """Verify combined loan balances exceeding the limit are flagged."""
+
+    result = check_total_outstanding_limit(
+        gross_monthly_salary=Decimal("400000"),
+        requested_amount=Decimal("2500000"),
+        existing_balance=Decimal("250000"),
+    )
+
+    assert result["combined_loan_amount"] == Decimal("2750000")
+    assert result["is_within_total_outstanding_limit"] is False

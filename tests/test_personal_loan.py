@@ -47,3 +47,6 @@ def test_personal_loan_uses_employee_salary():
     assert result.is_interest_affordable is True
     assert result.has_active_loan is False
     assert "No active loan was found" in result.active_loan_reason
+    assert result.existing_outstanding_balance == Decimal("0")
+    assert result.combined_loan_amount == Decimal("300000")
+    assert result.is_within_total_outstanding_limit is True

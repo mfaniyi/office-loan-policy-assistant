@@ -144,3 +144,6 @@ class PersonalLoanAssessmentResponse(LoanCalculationResponse):
     repayment_history_reason: str
     has_active_loan: bool | None = None
     active_loan_reason: str
+    existing_outstanding_balance: Decimal | None = None
+    combined_loan_amount: Decimal | None = None
+    is_within_total_outstanding_limit: bool | None = None

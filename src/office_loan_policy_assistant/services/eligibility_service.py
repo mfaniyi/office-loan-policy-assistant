@@ -1,6 +1,7 @@
 from office_loan_policy_assistant.models.employee import Employee
 from office_loan_policy_assistant.models.loan import Loan
 from datetime import date, timedelta
+from decimal import Decimal
 from dateutil.relativedelta import relativedelta
 
 
@@ -77,5 +78,34 @@ def check_active_loan(active_loan: Loan | None) -> dict:
             "Employee has an existing active loan. "
             "A new loan generally requires the existing loan to be settled. "
             "Management-approved top-up exceptions may apply."
+        ),
+    }
+
+
+def check_total_outstanding_limit(
+    gross_monthly_salary: Decimal,
+    requested_amount: Decimal,
+    existing_balance: Decimal,
+) -> dict:
+    """Check the total outstanding loan limit."""
+
+    if (
+        gross_monthly_salary <= 0
+        or requested_amount <= 0
+        or existing_balance < 0
+    ):
+        raise ValueError("Invalid loan or salary amount.")
+
+    # Apply the policy's 50% annual gross salary limit
+    annual_gross_salary = gross_monthly_salary * Decimal("12")
+    maximum_outstanding = annual_gross_salary * Decimal("0.50")
+
+    combined_amount = existing_balance + requested_amount
+
+    return {
+        "existing_outstanding_balance": existing_balance,
+        "combined_loan_amount": combined_amount,
+        "is_within_total_outstanding_limit": (
+            combined_amount <= maximum_outstanding
         ),
     }
