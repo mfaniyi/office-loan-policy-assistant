@@ -54,3 +54,4 @@ def test_personal_loan_uses_employee_salary():
     assert result.repayment_percentage is None
     assert result.meets_topup_repayment_rule is None
     assert result.requires_management_approval is None
+    assert result.is_topup is False

@@ -59,8 +59,8 @@ def calculate_personal_loan(
 
     topup_check = None
 
-    # Assess top-up repayment only when an active loan exists
-    if active_loan is not None:
+    # Assess top-up requirements only for explicit top-up requests
+    if request.is_topup and active_loan is not None:
         topup_check = check_loan_topup(
             principal_amount=active_loan.principal_amount,
             outstanding_balance=active_loan.outstanding_balance,
@@ -101,13 +101,19 @@ def calculate_personal_loan(
             "has not been satisfied."
         )
 
-    # Explain restrictions when an active company loan exists
     if active_loan_check["has_active_loan"]:
-        message += (
-            " An active company loan was found. "
-            "A new loan generally requires the existing loan to be settled. "
-            "Management-approved top-up exceptions may apply."
-        )
+        if request.is_topup:
+            message += (
+                " An active company loan was found. "
+                "The top-up request requires repayment eligibility checks "
+                "and management approval."
+            )
+        else:
+            message += (
+                " An active company loan was found. "
+                "A new regular loan generally requires the existing "
+                "loan to be settled."
+            )
 
     # Explain when combined borrowing exceeds the policy limit
     if not outstanding_check["is_within_total_outstanding_limit"]:
@@ -123,6 +129,14 @@ def calculate_personal_loan(
             " The employee has repaid less than 50% of the existing loan. "
             "The minimum repayment requirement for a top-up "
             "has not been satisfied."
+        )
+
+    # Explain why a top-up cannot be assessed without an existing loan
+    if request.is_topup and active_loan is None:
+        message += (
+            " A loan top-up requires an existing active loan. "
+            "No active company loan was found in the available records. "
+            "Please verify your loan history or request a regular loan."
         )
 
     return PersonalLoanAssessmentResponse(
@@ -157,4 +171,5 @@ def calculate_personal_loan(
         requires_management_approval=(
             topup_check["requires_management_approval"] if topup_check else None
         ),
+        is_topup=request.is_topup,
     )

@@ -132,6 +132,7 @@ class PersonalLoanAssessmentRequest(BaseModel):
         ge=0,
         le=100,
     )
+    is_topup: bool = False
 
 
 class PersonalLoanAssessmentResponse(LoanCalculationResponse):
@@ -151,3 +152,4 @@ class PersonalLoanAssessmentResponse(LoanCalculationResponse):
     repayment_percentage: Decimal | None = None
     meets_topup_repayment_rule: bool | None = None
     requires_management_approval: bool | None = None
+    is_topup: bool = False
