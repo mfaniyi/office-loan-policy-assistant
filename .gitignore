@@ -12,3 +12,8 @@ wheels/
 # Exclude local environment variables and secrets
 .env
 .env.*
+
+# Exclude internal policy documents
+documents/loan_policy/*
+
+*.dump

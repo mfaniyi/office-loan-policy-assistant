@@ -20,6 +20,7 @@ from office_loan_policy_assistant.db.database import Base
 from office_loan_policy_assistant.models.employee import Employee
 from office_loan_policy_assistant.models.user import User
 from office_loan_policy_assistant.models.loan import Loan
+from office_loan_policy_assistant.models.document_chunk import DocumentChunk
 
 # Register our SQLAlchemy models with Alembic
 target_metadata = Base.metadata

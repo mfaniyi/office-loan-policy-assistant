@@ -3,7 +3,7 @@ services:
 
   # PostgreSQL database service
   db:
-    image: postgres:17
+    image: pgvector/pgvector:pg17
     container_name: office_loan_db
     restart: unless-stopped
 
