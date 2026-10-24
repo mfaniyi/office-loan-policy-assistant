@@ -7,6 +7,7 @@ from office_loan_policy_assistant.services.eligibility_service import (
     check_active_loan,
     check_previous_loan_repayment,
     check_total_outstanding_limit,
+    check_loan_topup,
 )
 
 
@@ -63,3 +64,18 @@ def test_total_outstanding_limit_exceeded():
 
     assert result["combined_loan_amount"] == Decimal("2750000")
     assert result["is_within_total_outstanding_limit"] is False
+
+
+
+def test_loan_topup_repayment_threshold():
+    """Verify the minimum 50% principal repayment requirement."""
+
+    result = check_loan_topup(
+        principal_amount=Decimal("400000"),
+        outstanding_balance=Decimal("250000"),
+    )
+
+    assert result["repaid_amount"] == Decimal("150000")
+    assert result["repayment_percentage"] == Decimal("37.500")
+    assert result["meets_topup_repayment_rule"] is False
+    assert result["requires_management_approval"] is True

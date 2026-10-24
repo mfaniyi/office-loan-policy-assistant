@@ -14,6 +14,7 @@ from office_loan_policy_assistant.services.eligibility_service import (
     check_previous_loan_repayment,
     check_active_loan,
     check_total_outstanding_limit,
+    check_loan_topup,
 )
 from office_loan_policy_assistant.services.loan_record_service import (
     get_active_loan,
@@ -55,6 +56,15 @@ def calculate_personal_loan(
     )
 
     active_loan_check = check_active_loan(active_loan)
+
+    topup_check = None
+
+    # Assess top-up repayment only when an active loan exists
+    if active_loan is not None:
+        topup_check = check_loan_topup(
+            principal_amount=active_loan.principal_amount,
+            outstanding_balance=active_loan.outstanding_balance,
+        )
 
     # Calculate the outstanding balance using available company loan records
     existing_balance = (
@@ -107,6 +117,14 @@ def calculate_personal_loan(
             "The requested amount does not satisfy this borrowing limit."
         )
 
+    # Explain unmet top-up repayment requirements
+    if topup_check and not topup_check["meets_topup_repayment_rule"]:
+        message += (
+            " The employee has repaid less than 50% of the existing loan. "
+            "The minimum repayment requirement for a top-up "
+            "has not been satisfied."
+        )
+
     return PersonalLoanAssessmentResponse(
         **calculation.model_dump(exclude={"assessment_type", "message"}),
         assessment_type="personalized",
@@ -126,5 +144,17 @@ def calculate_personal_loan(
         combined_loan_amount=outstanding_check["combined_loan_amount"],
         is_within_total_outstanding_limit=outstanding_check[
             "is_within_total_outstanding_limit"
-        ],        
+        ],
+        repaid_amount=(
+            topup_check["repaid_amount"] if topup_check else None
+        ),
+        repayment_percentage=(
+            topup_check["repayment_percentage"] if topup_check else None
+        ),
+        meets_topup_repayment_rule=(
+            topup_check["meets_topup_repayment_rule"] if topup_check else None
+        ),
+        requires_management_approval=(
+            topup_check["requires_management_approval"] if topup_check else None
+        ),
     )

@@ -147,3 +147,7 @@ class PersonalLoanAssessmentResponse(LoanCalculationResponse):
     existing_outstanding_balance: Decimal | None = None
     combined_loan_amount: Decimal | None = None
     is_within_total_outstanding_limit: bool | None = None
+    repaid_amount: Decimal | None = None
+    repayment_percentage: Decimal | None = None
+    meets_topup_repayment_rule: bool | None = None
+    requires_management_approval: bool | None = None

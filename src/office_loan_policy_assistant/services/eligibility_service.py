@@ -109,3 +109,34 @@ def check_total_outstanding_limit(
             combined_amount <= maximum_outstanding
         ),
     }
+
+
+def check_loan_topup(
+    principal_amount: Decimal,
+    outstanding_balance: Decimal,
+) -> dict:
+    """Check whether at least 50% of an existing loan has been repaid."""
+
+    if principal_amount <= 0 or outstanding_balance < 0:
+        raise ValueError("Invalid loan amounts.")
+
+    if outstanding_balance > principal_amount:
+        raise ValueError(
+            "Outstanding balance cannot exceed the original principal "
+            "for this simplified top-up assessment."
+        )
+
+    # Calculate the proportion of principal already repaid
+    repaid_amount = principal_amount - outstanding_balance
+    repayment_percentage = (
+        repaid_amount / principal_amount
+    ) * Decimal("100")
+
+    return {
+        "repaid_amount": repaid_amount,
+        "repayment_percentage": repayment_percentage,
+        "meets_topup_repayment_rule": (
+            repayment_percentage >= Decimal("50")
+        ),
+        "requires_management_approval": True,
+    }

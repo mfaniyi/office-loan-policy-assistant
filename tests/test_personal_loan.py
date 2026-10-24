@@ -50,3 +50,7 @@ def test_personal_loan_uses_employee_salary():
     assert result.existing_outstanding_balance == Decimal("0")
     assert result.combined_loan_amount == Decimal("300000")
     assert result.is_within_total_outstanding_limit is True
+    assert result.repaid_amount is None
+    assert result.repayment_percentage is None
+    assert result.meets_topup_repayment_rule is None
+    assert result.requires_management_approval is None
