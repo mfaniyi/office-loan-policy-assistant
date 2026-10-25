@@ -1,12 +1,13 @@
 from sentence_transformers import CrossEncoder
+from functools import lru_cache
 
 
 RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
 
+@lru_cache(maxsize=1)
 def load_reranker() -> CrossEncoder:
-    """Load the cross-encoder reranking model."""
-
+    """Load and cache the reranking model."""
     return CrossEncoder(RERANKER_MODEL)
 
 

@@ -1,5 +1,6 @@
 from unittest.mock import Mock, patch
-
+from fastapi.testclient import TestClient
+from office_loan_policy_assistant.main import app
 from office_loan_policy_assistant.services.rag_service import (
     answer_policy_question,
 )
@@ -98,3 +99,29 @@ def test_rag_answers_supported_question():
     assert len(result.sources) == 1
     assert result.sources[0].page_number == 3
     assert "twice gross monthly salary" in result.answer
+
+
+def test_policy_api_handles_service_failure():
+    """Verify the API handles RAG service failures safely."""
+
+    client = TestClient(app)
+
+    with patch(
+        "office_loan_policy_assistant.api.policy.answer_policy_question_with_models",
+        side_effect=RuntimeError("Simulated service failure"),
+    ):
+        response = client.post(
+            "/policy/ask",
+            json={
+                "question": "What is the maximum personal loan amount?"
+            },
+        )
+
+    assert response.status_code == 503
+
+    assert response.json() == {
+        "detail": (
+            "The policy assistant is temporarily unavailable. "
+            "Please try again later."
+        )
+    }
