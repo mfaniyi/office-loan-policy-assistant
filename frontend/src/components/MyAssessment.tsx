@@ -25,6 +25,32 @@ const repaymentPeriods: Record<LoanType, number[]> = {
   development: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
 }
 
+const interestRules: Record<
+  LoanType,
+  { min: number; max: number; message: string }
+> = {
+  personal: {
+    min: 5,
+    max: 10,
+    message: 'Allowed annual interest rate: 5%–10%.',
+  },
+  salary_advance: {
+    min: 7,
+    max: 9,
+    message: 'Allowed annual interest rate: 7%–9%.',
+  },
+  development: {
+    min: 0,
+    max: 0,
+    message: 'Development loans are interest-free (0%).',
+  },
+  emergency: {
+    min: 0,
+    max: 0,
+    message: 'Emergency loan interest calculations are not supported.',
+  },
+}
+
 function formatCurrency(amount: number | null): string {
   if (amount === null) return 'N/A'
 
@@ -143,6 +169,8 @@ function MyAssessment({
                 ...previous,
                 loan_type: loanType,
                 repayment_months: repaymentPeriods[loanType][0],
+                annual_interest_rate:
+                    loanType === 'development' ? 0 : null,
               }))
 
               setResult(null)
@@ -189,22 +217,30 @@ function MyAssessment({
 
         <label>
           Annual Interest Rate (%) - Optional
-          <input
+            <input
             type="number"
-            min="0"
-            max="100"
+            min={interestRules[form.loan_type].min}
+            max={interestRules[form.loan_type].max}
             step="0.01"
+            disabled={form.loan_type === 'emergency'}
+            placeholder={
+                form.loan_type === 'emergency'
+                ? 'Not supported'
+                : 'Leave blank if not applicable'
+            }
             value={form.annual_interest_rate ?? ''}
-            placeholder="Leave blank if not applicable"
             onChange={(event) =>
-              updateField(
+                updateField(
                 'annual_interest_rate',
                 event.target.value === ''
-                  ? null
-                  : Number(event.target.value)
-              )
+                    ? null
+                    : Number(event.target.value)
+                )
             }
-          />
+            />
+            <small className="field-hint">
+            {interestRules[form.loan_type].message}
+            </small>
         </label>
 
         <label className="topup-option">

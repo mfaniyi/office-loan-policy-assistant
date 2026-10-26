@@ -613,3 +613,9 @@
 .assessment-fields:disabled {
   opacity: 0.7;
 }
+
+.field-hint {
+  color: #806d67;
+  font-size: 12px;
+  line-height: 1.5;
+}
