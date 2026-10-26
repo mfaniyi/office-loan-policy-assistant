@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import {
   assessMyLoan,
   type LoanType,
@@ -8,6 +8,7 @@ import {
 
 interface MyAssessmentProps {
   accessToken: string
+  onSessionExpired: () => void
 }
 
 const loanTypes: { value: LoanType; label: string }[] = [
@@ -35,7 +36,10 @@ function formatCurrency(amount: number | null): string {
   }).format(amount)
 }
 
-function MyAssessment({ accessToken }: MyAssessmentProps) {
+function MyAssessment({
+  accessToken,
+  onSessionExpired,
+}: MyAssessmentProps) {
   const [form, setForm] = useState<PersonalLoanAssessmentRequest>({
     loan_type: 'personal',
     requested_amount: 0,
@@ -46,10 +50,15 @@ function MyAssessment({ accessToken }: MyAssessmentProps) {
 
   const [result, setResult] =
     useState<PersonalLoanAssessmentResponse | null>(null)
-
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const abortControllerRef = useRef<AbortController | null>(null)
 
+  useEffect(() => {
+    return () => {
+        abortControllerRef.current?.abort()
+    }
+    }, [])
   function updateField<K extends keyof PersonalLoanAssessmentRequest>(
     field: K,
     value: PersonalLoanAssessmentRequest[K]
@@ -76,14 +85,37 @@ function MyAssessment({ accessToken }: MyAssessmentProps) {
     setResult(null)
 
     try {
-      const response = await assessMyLoan(form, accessToken)
-      setResult(response)
+        const controller = new AbortController()
+        abortControllerRef.current = controller
+
+        const response = await assessMyLoan(
+        form,
+        accessToken,
+        controller.signal
+        )
+
+        if (controller.signal.aborted) return
+
+        setResult(response)
     } catch (error) {
-      setError(
+    if (
+        error instanceof Error &&
+        error.message === 'Your session has expired. Please sign in again.'
+    ) {
+        onSessionExpired()
+        return
+    }
+
+    if (error instanceof Error && error.name === 'AbortError') {
+      return
+    }
+
+    setError(
         error instanceof Error
-          ? error.message
-          : 'Unable to complete your assessment.'
-      )
+        ? error.message
+        : 'Unable to complete your assessment.'
+    )
+
     } finally {
       setLoading(false)
     }

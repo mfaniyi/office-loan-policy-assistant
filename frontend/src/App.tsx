@@ -96,6 +96,12 @@ function App() {
     setLoading(false)
   }
 
+  function handleSessionExpired() {
+    setAccessToken(null)
+    setEmployeeProfile(null)
+    setActivePage('login')
+  }
+
   return (
     <div className="app">
       <aside className="sidebar">
@@ -281,7 +287,10 @@ function App() {
         ) : activePage === 'calculator' ? (
           <LoanCalculator />
         ) : activePage === 'assessment' && accessToken ? (
-          <MyAssessment accessToken={accessToken} />
+          <MyAssessment
+            accessToken={accessToken}
+            onSessionExpired={handleSessionExpired}
+          />
         ) : (
           <EmployeeLogin onLoginSuccess={handleLoginSuccess} />
         )}

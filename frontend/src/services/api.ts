@@ -177,7 +177,8 @@ export interface PersonalLoanAssessmentResponse
 
 export async function assessMyLoan(
   request: PersonalLoanAssessmentRequest,
-  accessToken: string
+  accessToken: string,
+  signal?: AbortSignal
 ): Promise<PersonalLoanAssessmentResponse> {
   const response = await fetch(`${API_BASE_URL}/loans/my-assessment`, {
     method: 'POST',
@@ -186,6 +187,7 @@ export async function assessMyLoan(
       Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify(request),
+    signal,
   })
 
   if (response.status === 401) {
