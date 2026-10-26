@@ -3,12 +3,23 @@ from office_loan_policy_assistant.api.policy import router as policy_router
 from office_loan_policy_assistant.api.auth import router as auth_router
 from office_loan_policy_assistant.api.employees import router as employee_router
 from office_loan_policy_assistant.api.loans import router as loan_router
-
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Office Loan Policy Assistant",
     description="AI-powered assistant for office loan policy guidance",
     version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 # Register application routers
