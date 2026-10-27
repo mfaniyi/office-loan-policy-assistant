@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from office_loan_policy_assistant.db.database import get_db
 from office_loan_policy_assistant.core.security import create_access_token
@@ -8,6 +8,7 @@ from office_loan_policy_assistant.schemas.auth import (
     TokenResponse,
 )
 from office_loan_policy_assistant.services.auth_service import authenticate_user
+from office_loan_policy_assistant.core.rate_limit import limiter
 
 
 # Create a router for authentication endpoints
@@ -19,7 +20,9 @@ router = APIRouter(
 
 # Define the employee login endpoint
 @router.post("/login", response_model=TokenResponse)
+@limiter.limit("5/minute")
 def login(
+    request: Request,
     credentials: LoginRequest,
     db: Annotated[Session, Depends(get_db)],
 ) -> TokenResponse:

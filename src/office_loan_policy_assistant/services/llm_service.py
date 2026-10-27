@@ -1,11 +1,13 @@
 import os
-
+import logging
+import time
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import OpenAI, APIError, APITimeoutError, APIConnectionError
 
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
 
 def get_llm_client() -> OpenAI:
     """Create the Microsoft Foundry inference client."""
@@ -45,29 +47,65 @@ def generate_policy_answer(
     if not deployment:
         raise ValueError("Azure OpenAI deployment is missing.")
 
-    response = client.chat.completions.create(
-        model=deployment,
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are an Office Loan Policy Assistant. "
-                    "Answer questions using only the supplied policy context. "
-                    "Do not invent policy rules, loan limits, or exceptions. "
-                    "If the context does not contain enough information, "
-                    "clearly state that the policy information is insufficient. "
-                    "Include relevant document names and page numbers. "
-                    "Never claim that a loan has been approved."
-                ),
-            },
-            {
-                "role": "user",
-                "content": (
-                    f"Question:\n{question}\n\n"
-                    f"Policy context:\n{context}"
-                ),
-            },
-        ],
+
+    start_time = time.perf_counter()
+
+    try:
+        response = client.chat.completions.create(
+            model=deployment,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are an Office Loan Policy Assistant. "
+                        "Answer questions using only the supplied policy context. "
+                        "Do not invent policy rules, loan limits, or exceptions. "
+                        "If the context does not contain enough information, "
+                        "clearly state that the policy information is insufficient. "
+                        "Include relevant document names and page numbers. "
+                        "Never claim that a loan has been approved."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        f"Question:\n{question}\n\n"
+                        f"Policy context:\n{context}"
+                    ),
+                },
+            ],
+        )
+    except (APITimeoutError, APIConnectionError):
+        latency_ms = (time.perf_counter() - start_time) * 1000
+
+        logger.error(
+            "LLM request failed | failure_type=connection_or_timeout | "
+            "latency_ms=%.2f",
+            latency_ms,
+        )
+        raise
+
+    except APIError:
+        latency_ms = (time.perf_counter() - start_time) * 1000
+
+        logger.error(
+            "LLM request failed | failure_type=api_error | "
+            "latency_ms=%.2f",
+            latency_ms,
+        )
+        raise
+
+    latency_ms = (time.perf_counter() - start_time) * 1000
+
+    usage = response.usage
+
+    logger.info(
+        "LLM request completed | latency_ms=%.2f | "
+        "prompt_tokens=%s | completion_tokens=%s | total_tokens=%s",
+        latency_ms,
+        usage.prompt_tokens if usage else None,
+        usage.completion_tokens if usage else None,
+        usage.total_tokens if usage else None,
     )
 
     answer = response.choices[0].message.content

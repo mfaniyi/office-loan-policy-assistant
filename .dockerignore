@@ -1,0 +1,40 @@
+# Python environment
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Git
+.git/
+.gitignore
+
+# Environment variables and credentials
+.env
+.env.*
+*.pem
+*.key
+
+# Database backups
+*.dump
+*.sql
+*.backup
+
+# Internal policy documents
+documents/
+
+# Frontend
+frontend/
+node_modules/
+dist/
+
+# Tests and development files
+tests/
+.coverage
+htmlcov/
+
+# Local files
+.vscode/
+.idea/
+*.log
+.DS_Store

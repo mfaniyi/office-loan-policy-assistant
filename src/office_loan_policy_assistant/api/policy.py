@@ -31,8 +31,11 @@ def ask_policy_question(
             db=db,
         )
 
-    except Exception:
-        logger.exception("Policy question processing failed")
+    except Exception as exc:
+        logger.error(
+            "Policy question processing failed | error_type=%s",
+            type(exc).__name__,
+        )
 
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
