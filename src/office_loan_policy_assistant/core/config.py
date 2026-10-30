@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     POSTGRES_DB: str
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5433
+    POSTGRES_SSLMODE: str = "prefer"
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
@@ -31,6 +32,10 @@ class Settings(BaseSettings):
             host=self.POSTGRES_HOST,
             port=self.POSTGRES_PORT,
             database=self.POSTGRES_DB,
+            query={
+                "sslmode": self.POSTGRES_SSLMODE,
+                "sslrootcert": "system",
+            },
         ).render_as_string(hide_password=False)
 
 
