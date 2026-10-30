@@ -20,6 +20,6 @@ def test_database_url_uses_system_certificate_store():
 
     assert url.drivername == "postgresql+psycopg"
     assert url.query["sslmode"] == "verify-full"
-    assert url.query["sslrootcert"] == "system"
+    assert url.query["sslrootcert"] == "/etc/ssl/certs/ca-certificates.crt"
     assert url.host == "localhost"
     assert url.database == "test_db"

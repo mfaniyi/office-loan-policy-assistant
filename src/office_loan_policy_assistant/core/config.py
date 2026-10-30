@@ -34,7 +34,7 @@ class Settings(BaseSettings):
             database=self.POSTGRES_DB,
             query={
                 "sslmode": self.POSTGRES_SSLMODE,
-                "sslrootcert": "system",
+                "sslrootcert": "/etc/ssl/certs/ca-certificates.crt",
             },
         ).render_as_string(hide_password=False)
 
