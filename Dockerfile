@@ -18,6 +18,11 @@ RUN uv sync --locked --no-dev
 
 FROM python:3.14-slim
 
+# Install trusted CA certificates for verified TLS connections to Azure PostgreSQL.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY --from=builder /app/.venv /app/.venv
