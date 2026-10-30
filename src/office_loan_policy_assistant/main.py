@@ -28,7 +28,7 @@ app = FastAPI(
 
 # Initialize Azure Monitor when an Application Insights connection string is available.
 if os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING"):
-    configure_azure_monitor()
+    configure_azure_monitor(logger_name="uvicorn.error")
 
 app.state.limiter = limiter
 
