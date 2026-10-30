@@ -1,6 +1,9 @@
 import logging
+import os
 import time
 import uuid
+
+from azure.monitor.opentelemetry import configure_azure_monitor
 
 from fastapi import Request
 from fastapi import FastAPI
@@ -22,6 +25,10 @@ app = FastAPI(
     description="AI-powered assistant for office loan policy guidance",
     version="1.0.0",
 )
+
+# Initialize Azure Monitor when an Application Insights connection string is available.
+if os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING"):
+    configure_azure_monitor()
 
 app.state.limiter = limiter
 
