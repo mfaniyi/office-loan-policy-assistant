@@ -619,3 +619,60 @@
   font-size: 12px;
   line-height: 1.5;
 }
+/* Calculator header and secondary assessment navigation */
+.calculator-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.calculator-heading {
+  flex: 1;
+}
+
+.calculator-heading h2 {
+  margin-bottom: 8px;
+}
+
+.calculator-heading p {
+  margin: 0;
+  color: #806d67;
+  line-height: 1.6;
+}
+
+.assessment-button {
+  flex-shrink: 0;
+  padding: 11px 18px;
+  background: #fff;
+  color: #762c48;
+  border: 1px solid #762c48;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.assessment-button:hover {
+  background: #762c48;
+  color: #fff;
+}
+
+.assessment-button:focus-visible {
+  outline: 3px solid #c9a35f;
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .calculator-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .assessment-button {
+    width: 100%;
+  }
+}

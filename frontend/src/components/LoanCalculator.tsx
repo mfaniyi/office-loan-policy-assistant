@@ -58,12 +58,10 @@ function formatCurrency(amount: number | null): string {
 }
 
 interface LoanCalculatorProps {
-  accessToken: string | null
   onOpenAssessment: () => void
 }
 
 function LoanCalculator({
-  accessToken,
   onOpenAssessment,
 }: LoanCalculatorProps) {
   const [form, setForm] = useState<LoanCalculationRequest>({
@@ -119,12 +117,23 @@ function LoanCalculator({
 
   return (
     <section className="calculator-container">
-      <h2>Loan Calculator</h2>
+      <div className="calculator-header">
+        <div className="calculator-heading">
+          <h2>Loan Calculator</h2>
+          <p>
+            Calculate estimated loan limits and repayments based on
+            the Office Loan Policy.
+          </p>
+        </div>
 
-      <p>
-        Calculate estimated loan limits and repayments based on
-        the Office Loan Policy.
-      </p>
+        <button
+          type="button"
+          className="assessment-button"
+          onClick={onOpenAssessment}
+        >
+          My Assessment
+        </button>
+      </div>
 
       <form onSubmit={handleCalculate} className="calculator-form">
         <label>
@@ -256,20 +265,6 @@ function LoanCalculator({
           {loading ? 'Calculating...' : 'Calculate Loan'}
         </button>
       </form>
-
-      <div className="assessment-navigation">
-        <button
-          type="button"
-          className="login-button"
-          onClick={onOpenAssessment}
-        >
-          My Assessment
-        </button>
-
-        {!accessToken && (
-          <small>Please sign in to access your personal loan assessment.</small>
-        )}
-      </div>
 
       {error && <p role="alert" className="error-message">{error}</p>}
 

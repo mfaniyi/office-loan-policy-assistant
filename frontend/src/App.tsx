@@ -277,7 +277,6 @@ function App() {
           </>
         ) : activePage === 'calculator' ? (
           <LoanCalculator
-            accessToken={accessToken}
             onOpenAssessment={() =>
               setActivePage(accessToken ? 'assessment' : 'login')
             }
