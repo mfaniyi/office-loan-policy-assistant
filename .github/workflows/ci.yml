@@ -5,6 +5,12 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: "Commit SHA to test (leave empty to test the selected branch)"
+        required: false
+        type: string
 
 jobs:
   backend-tests:
@@ -13,15 +19,12 @@ jobs:
     services:
       postgres:
         image: pgvector/pgvector:pg17
-
         env:
           POSTGRES_USER: test_user
           POSTGRES_PASSWORD: test_password
           POSTGRES_DB: office_loan_test
-
         ports:
           - 5432:5432
-
         options: >-
           --health-cmd "pg_isready -U test_user -d office_loan_test"
           --health-interval 10s
@@ -37,16 +40,18 @@ jobs:
       JWT_SECRET_KEY: ci_test_secret_not_for_production
 
     steps:
-      - name: Checkout repository
+      - name: Checkout selected commit
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit_sha || github.sha }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6
 
       - name: Set up Python
         run: |
-           uv python install 3.14
-           uv python pin 3.14
+          uv python install 3.14
+          uv python pin 3.14
 
       - name: Install dependencies
         run: uv sync --locked
