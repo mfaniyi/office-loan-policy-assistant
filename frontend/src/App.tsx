@@ -124,15 +124,6 @@ function App() {
           >
             Loan Calculator
           </button>
-          <button
-            type="button"
-            className={`nav-item ${activePage === 'assessment' ? 'active' : ''}`}
-            onClick={() => {
-              setActivePage(accessToken ? 'assessment' : 'login')
-            }}
-          >
-            My Assessment
-          </button>
         </nav>
 
         <div className="sidebar-footer">
@@ -285,7 +276,12 @@ function App() {
             </section>
           </>
         ) : activePage === 'calculator' ? (
-          <LoanCalculator />
+          <LoanCalculator
+            accessToken={accessToken}
+            onOpenAssessment={() =>
+              setActivePage(accessToken ? 'assessment' : 'login')
+            }
+          />
         ) : activePage === 'assessment' && accessToken ? (
           <MyAssessment
             accessToken={accessToken}

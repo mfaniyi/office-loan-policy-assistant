@@ -57,7 +57,15 @@ function formatCurrency(amount: number | null): string {
   }).format(amount)
 }
 
-function LoanCalculator() {
+interface LoanCalculatorProps {
+  accessToken: string | null
+  onOpenAssessment: () => void
+}
+
+function LoanCalculator({
+  accessToken,
+  onOpenAssessment,
+}: LoanCalculatorProps) {
   const [form, setForm] = useState<LoanCalculationRequest>({
     loan_type: 'personal',
     gross_monthly_salary: 0,
@@ -248,6 +256,20 @@ function LoanCalculator() {
           {loading ? 'Calculating...' : 'Calculate Loan'}
         </button>
       </form>
+
+      <div className="assessment-navigation">
+        <button
+          type="button"
+          className="login-button"
+          onClick={onOpenAssessment}
+        >
+          My Assessment
+        </button>
+
+        {!accessToken && (
+          <small>Please sign in to access your personal loan assessment.</small>
+        )}
+      </div>
 
       {error && <p role="alert" className="error-message">{error}</p>}
 
